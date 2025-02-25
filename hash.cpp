@@ -51,6 +51,29 @@ vector<int>  find_first_64_prime()
 
     return v;
 }
+void reverse(bitset<32> &a , int i , int j)
+{
+    while(i < j)
+    {
+        bool bit_i = a[i];
+        bool bit_j = a[j];
+        a[j] = bit_i;
+        a[i] = bit_j;
+        i++;
+        j--;
+    }
+}
+bitset<32> RightShift(bitset<32> &a , int k)
+{
+    return a >> k;
+}
+bitset<32> CircularRightShift(bitset<32> &a , int k)
+{
+    reverse(a ,  0 , 32 - k - 1 );
+    reverse(a ,  32 - k , 31);
+    reverse(a ,  0 , 31);
+    return a;
+}
 int main()
 {
     string password = "";
@@ -114,10 +137,25 @@ int main()
     }
     b.push_back(original_bit_length);
 
-    for(int i = 0; i < b.size(); i++){
-        cout<< b[i] << " ";
-        if((i + 1) % 4 == 0) cout<< endl;
-    }
+    // for(int i = 0; i < b.size(); i++){
+    //     cout<< b[i] << " ";
+    //     if((i + 1) % 4 == 0) cout<< endl;
+    // }
 
     //3 phase block decomposition
+    vector<bitset<32>> block;
+    // 16 blocks are divided into 32 bits from b and are inserted to block 
+    for(size_t i = 0; i < b.size(); i += 4){
+        bitset<32> combined  = (bitset<32>(b[i].to_ulong())  << 24) |
+                               (bitset<32>(b[i + 1].to_ulong())  << 16) |
+                               (bitset<32>(b[i + 2].to_ulong())  << 8) |
+                                bitset<32>(b[i + 3].to_ulong());
+        block.push_back(combined);
+    }
+    
+    // next 48 blocks
+    // for(int i = 16; i < 64; i++){
+    //     bitset<32> combined = (block[i - 7].to_ulong()) + 
+    //                           (block[i - 16].to_ulong());
+    // } 
 }
