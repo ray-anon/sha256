@@ -1,7 +1,12 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <bitset>
 using namespace std;
-int main()
-{
-    bitset<9> b();
-    cout<< b;
+
+void sha256_pad(vector<bitset<8>>& b) {
+}
+
+// Example usage
+int main() {
+    
 }
