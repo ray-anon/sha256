@@ -51,7 +51,7 @@ vector<int>  find_first_64_prime()
 
     return v;
 }
-void reverse(bitset<32> &a , int i , int j)
+void reverse(bitset<32> &a , int j , int i)
 {
     while(i < j)
     {
@@ -63,16 +63,25 @@ void reverse(bitset<32> &a , int i , int j)
         j--;
     }
 }
-bitset<32> RightShift(bitset<32> &a , int k)
+bitset<32> RightShift(bitset<32> a , int k)
 {
     return a >> k;
 }
-bitset<32> CircularRightShift(bitset<32> &a , int k)
+// bits are reprenset from n - 1 to 0 in bitset
+bitset<32> CircularRightShift(bitset<32> a , int k)
 {
-    reverse(a ,  0 , 32 - k - 1 );
-    reverse(a ,  32 - k , 31);
-    reverse(a ,  0 , 31);
+    reverse(a ,  31 , k);
+    reverse(a ,  k - 1 , 0);
+    reverse(a ,  31 , 0);
     return a;
+}
+bitset<32> sigma0(bitset<32> a)
+{
+    return CircularRightShift(a , 7) ^ CircularRightShift(a , 18) ^ RightShift(a , 3);
+}
+bitset<32> sigma1(bitset<32> a)
+{
+    return CircularRightShift(a , 17) ^ CircularRightShift(a , 19) ^ RightShift(a , 10);
 }
 int main()
 {
@@ -152,10 +161,32 @@ int main()
                                 bitset<32>(b[i + 3].to_ulong());
         block.push_back(combined);
     }
+    //next 48 blocks
+    for(int i = 16; i < 64; i++){
+        bitset<32> combined = (block[i - 7].to_ulong()) + 
+                              (block[i - 16].to_ulong()) + 
+                              (sigma0(block[i - 15]).to_ulong()) +
+                              (sigma1(block[i - 2]).to_ulong());
+        block.push_back(combined);                    
+    } 
+    // 4 phase  hash computation;
+    vector<int> prime8 = {2 , 3 , 5 , 7 , 11 , 13 , 17 , 19};
+    vector<double> hexprime8;
+    vector<string> hexvalues8;
+
+    for(int i = 0; i < prime8.size(); i++){
+        hexprime8.push_back(sqrt(prime8[i]));
+    }
+
+    for(int i = 0; i < hexprime8.size(); i++){
+        hexprime8[i] = hexprime8[i] - int(hexprime8[i]);
+    }
+
+    for(int i = 0; i < hexprime8.size(); i++){
+        unsigned int num  = static_cast<unsigned int>(hexprime8[i] * pow(2 , 32));
+        stringstream ss;
+        ss <<  hex << showbase << num;
+        hexvalues8.push_back(ss.str());
+    }
     
-    // next 48 blocks
-    // for(int i = 16; i < 64; i++){
-    //     bitset<32> combined = (block[i - 7].to_ulong()) + 
-    //                           (block[i - 16].to_ulong());
-    // } 
 }
