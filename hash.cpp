@@ -83,6 +83,22 @@ bitset<32> sigma1(bitset<32> a)
 {
     return CircularRightShift(a , 17) ^ CircularRightShift(a , 19) ^ RightShift(a , 10);
 }
+bitset<32> summation0(bitset<32> a)
+{
+    return CircularRightShift(a , 2) ^ CircularRightShift(a , 13) ^ CircularRightShift(a , 22);
+}
+bitset<32> summation1(bitset<32> a)
+{
+    return CircularRightShift(a , 6) ^ CircularRightShift(a , 11) ^ CircularRightShift(a , 25);
+}
+bitset<32> Choose(bitset<32> x , bitset<32> y , bitset<32> z)
+{
+    return (x & y) ^ (~x & z);
+}
+bitset<32> Majority(bitset<32> x , bitset<32> y , bitset<32> z)
+{
+    return (x & y) ^ (x & z) ^ (y & z);
+}
 int main()
 {
     string password = "";
@@ -91,7 +107,7 @@ int main()
 
     int n = password.size();
     int arr[n];
-    vector<bitset<8>> b;
+    vector<bitset<8>> b1;
 
     //converting string to ascii value
     for(int i = 0; i < n; i++)
@@ -102,7 +118,7 @@ int main()
     //padding the string
     for(int i = 0; i < n; i++)
     {
-        b.push_back(password[i]);
+        b1.push_back(password[i]);
     }
 
     //finding first 64 prime
@@ -133,18 +149,17 @@ int main()
         ss << hex << showbase <<  num  ;
         hexvalues.push_back(ss.str());
     }
-    
     // 2 phase starting padding
-    b.push_back(128);
-    size_t original_bit_length = (b.size() * 8) - 8;
+    b1.push_back(128);
+    size_t original_bit_length = (b1.size() * 8) - 8;
     size_t target_padding_length = ((original_bit_length + 8 + 64 + 511) / 512) * 512;
     size_t zero_padding_bits = (target_padding_length - original_bit_length - 8 - 64);
     size_t zero_padding_bytes = zero_padding_bits/8;
     
     for(int i = 0; i < zero_padding_bytes + 7; i++){
-        b.push_back(0);
+        b1.push_back(0);
     }
-    b.push_back(original_bit_length);
+    b1.push_back(original_bit_length);
 
     // for(int i = 0; i < b.size(); i++){
     //     cout<< b[i] << " ";
@@ -154,11 +169,11 @@ int main()
     //3 phase block decomposition
     vector<bitset<32>> block;
     // 16 blocks are divided into 32 bits from b and are inserted to block 
-    for(size_t i = 0; i < b.size(); i += 4){
-        bitset<32> combined  = (bitset<32>(b[i].to_ulong())  << 24) |
-                               (bitset<32>(b[i + 1].to_ulong())  << 16) |
-                               (bitset<32>(b[i + 2].to_ulong())  << 8) |
-                                bitset<32>(b[i + 3].to_ulong());
+    for(size_t i = 0; i < b1.size(); i += 4){
+        bitset<32> combined  = (bitset<32>(b1[i].to_ulong())  << 24) |
+                               (bitset<32>(b1[i + 1].to_ulong())  << 16) |
+                               (bitset<32>(b1[i + 2].to_ulong())  << 8) |
+                                bitset<32>(b1[i + 3].to_ulong());
         block.push_back(combined);
     }
     //next 48 blocks
@@ -185,8 +200,124 @@ int main()
     for(int i = 0; i < hexprime8.size(); i++){
         unsigned int num  = static_cast<unsigned int>(hexprime8[i] * pow(2 , 32));
         stringstream ss;
+
         ss <<  hex << showbase << num;
         hexvalues8.push_back(ss.str());
     }
-    
+
+    //assing abcdefg values
+    vector<bitset<32>> abcdefg;
+    for(int i = 0; i < 8; i++)
+    {
+        unsigned int  value;
+        stringstream convert;
+        convert << hex << hexvalues8[i];
+        convert >> value;
+
+        abcdefg.push_back(value);
+    }
+
+    bitset<32> a = abcdefg[0];
+    bitset<32> b = abcdefg[1];
+    bitset<32> c = abcdefg[2];
+    bitset<32> d = abcdefg[3];
+    bitset<32> e = abcdefg[4];
+    bitset<32> f = abcdefg[5];
+    bitset<32> g = abcdefg[6];
+    bitset<32> h = abcdefg[7];
+
+    bitset<32> H1 = abcdefg[0]; 
+    bitset<32> H2 = abcdefg[1]; 
+    bitset<32> H3 = abcdefg[2]; 
+    bitset<32> H4 = abcdefg[3]; 
+    bitset<32> H5 = abcdefg[4]; 
+    bitset<32> H6 = abcdefg[5]; 
+    bitset<32> H7 = abcdefg[6]; 
+    bitset<32> H8 = abcdefg[7]; 
+
+    //  do 64 rounds  operations
+    bitset<32> T1 , T2;
+
+    for(int i = 0; i < 64; i++)
+    {
+        unsigned int  value1 , value2;
+        stringstream convert1 , convert2;
+
+        convert1 << hex << hexvalues[i];
+        convert2 << hex << block[i];
+
+        convert1 >> value1;
+        convert2 >> value2;
+
+        bitset<32> k = value1;
+        bitset<32> w = value2;
+
+        T1 = bitset<32>(
+            h.to_ulong() +
+            summation1(e).to_ulong() +
+            Choose(e, f, g).to_ulong() +
+            k.to_ulong() +
+            w.to_ulong()
+        );
+        T2 = bitset<32>(
+            summation0(a).to_ulong() +
+            Majority(a, b, c).to_ulong()
+        );
+        h = g;
+        g = f;
+        f = e;
+        e = bitset<32>(
+            d.to_ulong() +
+            T1.to_ulong()
+        );
+        d = c;
+        c = b;
+        b = a;
+        a = bitset<32>(
+            T1.to_ulong() +
+            T2.to_ulong()
+        );
+    }
+    H1 = bitset<32>(
+        H1.to_ulong() +
+        a.to_ulong()
+    );
+    H2 = bitset<32>(
+        H2.to_ulong() +
+        b.to_ulong()
+    );
+    H3 = bitset<32>(
+        H3.to_ulong() +
+        c.to_ulong()
+    );
+    H4 = bitset<32>(
+        H4.to_ulong() +
+        d.to_ulong()
+    );
+    H5 = bitset<32>(
+        H5.to_ulong() +
+        e.to_ulong()
+    );
+    H6 = bitset<32>(
+        H6.to_ulong() +
+        f.to_ulong()
+    );
+    H7 = bitset<32>(
+        H7.to_ulong() +
+        g.to_ulong()
+    );
+    H8 = bitset<32>(
+        H8.to_ulong() +
+        h.to_ulong()
+    );
+    cout << "Final Hash: ";
+    cout << hex << H1.to_ulong()
+        << H2.to_ulong()
+        << H3.to_ulong()
+        << H4.to_ulong()
+        << H5.to_ulong()
+        << H6.to_ulong()
+        << H7.to_ulong()
+        << H8.to_ulong() << endl;
+
 }
