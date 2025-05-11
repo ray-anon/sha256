@@ -102,7 +102,7 @@ bitset<32> Majority(bitset<32> x , bitset<32> y , bitset<32> z)
 int main()
 {
     string password = "";
-    cout<< "Enter the password to Hash";
+    cout<< "Enter the password to Hash: ";
     cin>> password;
 
     int n = password.size();
@@ -149,6 +149,7 @@ int main()
         ss << hex << showbase <<  num  ;
         hexvalues.push_back(ss.str());
     }
+    
     // 2 phase starting padding
     b1.push_back(128);
     size_t original_bit_length = (b1.size() * 8) - 8;
@@ -161,8 +162,8 @@ int main()
     }
     b1.push_back(original_bit_length);
 
-    // for(int i = 0; i < b.size(); i++){
-    //     cout<< b[i] << " ";
+    // for(int i = 0; i < b1.size(); i++){
+    //     cout<< b1[i] << " ";
     //     if((i + 1) % 4 == 0) cout<< endl;
     // }
 
@@ -176,6 +177,7 @@ int main()
                                 bitset<32>(b1[i + 3].to_ulong());
         block.push_back(combined);
     }
+    
     //next 48 blocks
     for(int i = 16; i < 64; i++){
         bitset<32> combined = (block[i - 7].to_ulong()) + 
@@ -184,6 +186,7 @@ int main()
                               (sigma1(block[i - 2]).to_ulong());
         block.push_back(combined);                    
     } 
+    
     // 4 phase  hash computation;
     vector<int> prime8 = {2 , 3 , 5 , 7 , 11 , 13 , 17 , 19};
     vector<double> hexprime8;
@@ -204,7 +207,7 @@ int main()
         ss <<  hex << showbase << num;
         hexvalues8.push_back(ss.str());
     }
-
+   
     //assing abcdefg values
     vector<bitset<32>> abcdefg;
     for(int i = 0; i < 8; i++)
@@ -213,7 +216,6 @@ int main()
         stringstream convert;
         convert << hex << hexvalues8[i];
         convert >> value;
-
         abcdefg.push_back(value);
     }
 
@@ -240,17 +242,16 @@ int main()
 
     for(int i = 0; i < 64; i++)
     {
-        unsigned int  value1 , value2;
-        stringstream convert1 , convert2;
+        unsigned int  value1;
+        stringstream convert1;
 
         convert1 << hex << hexvalues[i];
-        convert2 << hex << block[i];
 
         convert1 >> value1;
-        convert2 >> value2;
 
         bitset<32> k = value1;
-        bitset<32> w = value2;
+        // fucking yes project done on 2 : 10 am fucking yes
+        bitset<32> w = block[i];
 
         T1 = bitset<32>(
             h.to_ulong() +
