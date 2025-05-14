@@ -165,7 +165,7 @@ int main()
     // for(int i = 0; i < b1.size(); i++){
     //     cout<< b1[i] << " ";
     //     if((i + 1) % 4 == 0) cout<< endl;
-    // }
+    // }e
 
     //3 phase block decomposition
     vector<bitset<32>> block;
@@ -307,7 +307,7 @@ int main()
         H7.to_ulong() +
         g.to_ulong()
     );
-    H8 = bitset<32>(
+    H8 = bitset<32>( 
         H8.to_ulong() +
         h.to_ulong()
     );
