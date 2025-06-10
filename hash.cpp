@@ -321,4 +321,19 @@ int main()
         << H7.to_ulong()
         << H8.to_ulong() << endl;
 
+
+    ofstream out("test.txt");  // file path to store
+    if (out.is_open()) {
+        out << hex << H1.to_ulong()
+            << H2.to_ulong()
+            << H3.to_ulong()
+            << H4.to_ulong()
+            << H5.to_ulong()
+            << H6.to_ulong()
+            << H7.to_ulong()
+            << H8.to_ulong();
+        out << endl;
+        out.close();
+    }
+
 }
